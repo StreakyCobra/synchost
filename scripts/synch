@@ -1,0 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Import the main function of synchost
+from synchost.__main__ import run
+
+# When used as script, run synchost
+if __name__ == "__main__":
+    run()
