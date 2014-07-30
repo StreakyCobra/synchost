@@ -3,7 +3,7 @@
 _synch()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
-    COMPREPLY=( $(compgen -W "status update" -- $cur) )
+    COMPREPLY=( $(compgen -W "status update batch-update" -- $cur) )
 }
 
 complete -F _synch synch
