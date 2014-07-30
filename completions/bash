@@ -1,0 +1,9 @@
+# Bash completion for synch
+
+_synch()
+{
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    COMPREPLY=( $(compgen -W "status update" -- $cur) )
+}
+
+complete -F _synch synch
