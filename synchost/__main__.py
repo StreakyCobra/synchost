@@ -51,10 +51,6 @@ def print_line(name, rc, text=None, nl=True):
         color = 'yellow'
         if text is None:
             text = "NA"
-    elif rc == -2:
-        color = 'white'
-        if text is None:
-            text = "NA"
     else:
         color = 'red'
         if text is None:
@@ -73,7 +69,7 @@ def apply(modname, funcname, printname=None):
     if printname is None:
         printname = modname
 
-    print_line(printname, -2, "Processing…", nl=False)
+    print_line(printname, -1, "Processing…", nl=False)
 
     # Get desired function
     try:
