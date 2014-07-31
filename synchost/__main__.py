@@ -74,10 +74,16 @@ def apply(modname, funcname, printname=None):
     # Get desired function
     try:
         func = getattr(load_module(modname), funcname)
+    except BaseException:
+        sys.stdout.write(restart_line)
+        return
+
+    # Execute desired function
+    try:
         result = func()
     except BaseException:
         sys.stdout.write(restart_line)
-        print_line(printname, -1, "No \"%s()\" function" % funcname)
+        print_line(printname, -1, "Call to \"%s()\" failed" % funcname)
         return
 
     sys.stdout.write(restart_line)
@@ -86,16 +92,18 @@ def apply(modname, funcname, printname=None):
     elif result is not None:
         print_line(printname, result[0], result[1])
     else:
-        print_line(printname, 1, "Function \"%s()\" failed" % funcname)
+        print_line(printname, 1, "Bad result returned from \"%s()\"" % funcname)
 
 
-def plugins():
-    filenames = os.listdir(plugins_path)
-    filenames = filter(lambda x: os.path.isfile(os.path.join(plugins_path, x)),
-                       filenames)
-    filenames = map(lambda x: os.path.splitext(x), filenames)
-    filenames = filter(lambda x: x[1] == '.py', filenames)
-    plugins = list(map(lambda x: x[0], filenames))
+def plugins(target=None):
+    plugins = [target]
+    if target is None:
+        filenames = os.listdir(plugins_path)
+        filenames = filter(lambda x: os.path.isfile(os.path.join(plugins_path,
+                                                                 x)), filenames)
+        filenames = map(lambda x: os.path.splitext(x), filenames)
+        filenames = filter(lambda x: x[1] == '.py', filenames)
+        plugins = list(map(lambda x: x[0], filenames))
 
     global maxlen
     maxlen = max(map(len, plugins))
@@ -114,12 +122,16 @@ def plugins():
 
 def run():
     cmd = 'status'
-    if len(sys.argv) >= 2:
+    target = None
+    if len(sys.argv) == 2:
         cmd = sys.argv[1]
+    elif len(sys.argv) == 3:
+        cmd = sys.argv[1]
+        target = sys.argv[2]
 
     print_title(cmd.upper())
 
-    plugs = plugins()
+    plugs = plugins(target)
 
     for cat in sorted(plugs.keys()):
         sys.stdout.write('\n')
