@@ -76,6 +76,7 @@ def apply(modname, funcname, printname=None):
         func = getattr(load_module(modname), funcname)
         result = func()
     except BaseException:
+        sys.stdout.write(restart_line)
         print_line(printname, -1, "No \"%s()\" function" % funcname)
         return
 
