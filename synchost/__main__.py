@@ -4,6 +4,7 @@ import importlib
 import os
 import sys
 
+from collections import defaultdict
 from synchost.config import plugins_path
 
 sys.path.insert(0, plugins_path)
@@ -32,11 +33,12 @@ def load_module(module_name):
     return mod
 
 
-def print_title(val):
+def print_title(val, sub=False):
+    sym = '-' if sub else "="
     sys.stdout.write(colored(val, 'cyan'))
     sys.stdout.write('\n')
-    sys.stdout.write(colored('-' * len(val), 'magenta'))
-    sys.stdout.write('\n\n')
+    sys.stdout.write(colored(sym * len(val), 'magenta'))
+    sys.stdout.write('\n')
 
 
 def print_result(name, rc, text=None):
@@ -92,7 +94,16 @@ def plugins():
     global maxlen
     maxlen = max(map(len, plugins))
 
-    return plugins
+    result = defaultdict(list)
+    for plugin in plugins:
+        # Get desired function
+        try:
+            func = getattr(load_module(plugin), 'category')
+            result[func].append(plugin)
+        except BaseException:
+            result['Unknown'].append(plugin)
+
+    return result
 
 
 def run():
@@ -100,10 +111,13 @@ def run():
     if len(sys.argv) >= 2:
         cmd = sys.argv[1]
 
-    print_title(cmd)
+    print_title(cmd.upper())
 
-    for plugin in plugins():
-        apply(plugin, cmd)
+    for cat, plgs in plugins().items():
+        sys.stdout.write('\n')
+        print_title(cat, sub=True)
+        for plugin in plgs:
+            apply(plugin, cmd)
 
 
 # When used as a script
