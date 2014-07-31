@@ -20,6 +20,7 @@ colors['magenta'] = "\x1b[95m"
 colors['cyan'] = "\x1b[96m"
 colors['white'] = "\x1b[97m"
 colors['OFF'] = "\x1b[0m"
+restart_line = "\033[2K\r"
 
 
 def colored(text, color):
@@ -41,13 +42,17 @@ def print_title(val, sub=False):
     sys.stdout.write('\n')
 
 
-def print_result(name, rc, text=None):
+def print_line(name, rc, text=None, nl=True):
     if rc == 0:
         color = 'green'
         if text is None:
             text = "OK"
     elif rc == -1:
         color = 'yellow'
+        if text is None:
+            text = "NA"
+    elif rc == -2:
+        color = 'white'
         if text is None:
             text = "NA"
     else:
@@ -59,7 +64,8 @@ def print_result(name, rc, text=None):
                              'blue'))
     sys.stdout.write(colored(' → ', 'magenta'))
     sys.stdout.write(colored(text, color))
-    sys.stdout.write('\n')
+    sys.stdout.write('\n' if nl else '')
+    sys.stdout.flush()
 
 
 def apply(modname, funcname, printname=None):
@@ -67,20 +73,23 @@ def apply(modname, funcname, printname=None):
     if printname is None:
         printname = modname
 
+    print_line(printname, -2, "Processing…", nl=False)
+
     # Get desired function
     try:
         func = getattr(load_module(modname), funcname)
         result = func()
     except BaseException:
-        print_result(printname, -1, "No \"%s()\" function" % funcname)
+        print_line(printname, -1, "No \"%s()\" function" % funcname)
         return
 
+    sys.stdout.write(restart_line)
     if isinstance(result, int):
-        print_result(printname, result)
+        print_line(printname, result)
     elif result is not None:
-        print_result(printname, result[0], result[1])
+        print_line(printname, result[0], result[1])
     else:
-        print_result(printname, 1, "Function \"%s()\" failed" % funcname)
+        print_line(printname, 1, "Function \"%s()\" failed" % funcname)
 
 
 def plugins():
