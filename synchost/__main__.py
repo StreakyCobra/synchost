@@ -113,10 +113,12 @@ def run():
 
     print_title(cmd.upper())
 
-    for cat, plgs in plugins().items():
+    plugs = plugins()
+
+    for cat in sorted(plugs.keys()):
         sys.stdout.write('\n')
         print_title(cat, sub=True)
-        for plugin in plgs:
+        for plugin in sorted(plugs[cat]):
             apply(plugin, cmd)
 
 
