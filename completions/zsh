@@ -1,4 +1,0 @@
-#compdef synch
-# Zsh completion for synch
-
-_arguments "1: :(status update batch-update)"
