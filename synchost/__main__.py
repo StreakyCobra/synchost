@@ -64,19 +64,12 @@ def print_line(name, rc, text=None, nl=True):
     sys.stdout.flush()
 
 
-def apply(modname, funcname, printname=None):
+def apply(modname, func, funcname, printname=None):
     # Create title from function name if not specified
     if printname is None:
         printname = modname
 
     print_line(printname, -1, "Processing…", nl=False)
-
-    # Get desired function
-    try:
-        func = getattr(load_module(modname), funcname)
-    except BaseException:
-        sys.stdout.write(restart_line)
-        return
 
     # Execute desired function
     try:
@@ -95,7 +88,7 @@ def apply(modname, funcname, printname=None):
         print_line(printname, 1, "Bad result returned from \"%s()\"" % funcname)
 
 
-def plugins(target=None):
+def functions(funcname, target=None):
     plugins = [target]
     if target is None:
         filenames = os.listdir(plugins_path)
@@ -112,10 +105,16 @@ def plugins(target=None):
     for plugin in plugins:
         # Get desired function
         try:
-            func = getattr(load_module(plugin), 'category')
-            result[func].append(plugin)
+            func = getattr(load_module(plugin), funcname)
         except BaseException:
-            result['Unknown'].append(plugin)
+            continue
+
+        # Get category
+        try:
+            cat = getattr(load_module(plugin), 'category')
+            result[cat].append((plugin, func))
+        except BaseException:
+            result['Unknown'].append((plugin, func))
 
     return result
 
@@ -131,13 +130,13 @@ def run():
 
     print_title(cmd.upper())
 
-    plugs = plugins(target)
+    funcs = functions(cmd, target)
 
-    for cat in sorted(plugs.keys()):
+    for cat in sorted(funcs.keys()):
         sys.stdout.write('\n')
         print_title(cat, sub=True)
-        for plugin in sorted(plugs[cat]):
-            apply(plugin, cmd)
+        for plugin, func in sorted(funcs[cat]):
+            apply(plugin, func, cmd)
 
 
 # When used as a script
